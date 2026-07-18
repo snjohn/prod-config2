@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: backend
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # This URI allows the service to fetch the public keys from Keycloak 
+          # to verify the token signature
+          issuer-uri: http://keycloak:8080/realms/myrealm
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eurekaserver:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true

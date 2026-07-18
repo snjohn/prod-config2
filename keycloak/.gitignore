@@ -1,0 +1,4 @@
+# Ignore local overrides and sensitive data
+*-local.json
+*.bak
+*.tmp

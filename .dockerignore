@@ -1,0 +1,32 @@
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Documentation
+*.md
+README.md
+HELP.md
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Maven build outputs (will be rebuilt in Docker)
+**/target/
+
+# Keycloak data
+keycloak-data/
+
+# NGINX
+nginx/

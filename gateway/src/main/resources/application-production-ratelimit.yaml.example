@@ -1,0 +1,59 @@
+# Example configuration for production-grade distributed rate limiting using Redis
+# This configuration replaces the in-memory RateLimitGatewayFilterFactory with
+# Spring Cloud Gateway's built-in Redis-backed RequestRateLimiter.
+#
+# IMPORTANT: Rename this file to application-production.yaml and activate with:
+#   SPRING_PROFILES_ACTIVE=production
+#
+# For distributed rate limiting across multiple gateway instances, this Redis-based
+# approach ensures consistent rate limits regardless of which gateway instance handles
+# the request.
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: backend-service
+          uri: lb://backend
+          predicates:
+            - Path=/api/**
+          filters:
+            - TokenRelay
+            # Redis-based distributed rate limiter
+            - name: RequestRateLimiter
+              args:
+                # Tokens added per second (steady-state rate)
+                redis-rate-limiter.replenishRate: 10
+                # Maximum burst capacity (bucket size)
+                redis-rate-limiter.burstCapacity: 20
+                # Number of tokens consumed per request
+                redis-rate-limiter.requestedTokens: 1
+                # Key resolver bean reference - determines how to identify clients
+                # Options: principalNameKeyResolver (by user), remoteAddrKeyResolver (by IP)
+                key-resolver: "#{@remoteAddrKeyResolver}"
+
+        # Example: Different rate limits for different routes
+        - id: high-traffic-api
+          uri: lb://high-traffic-service
+          predicates:
+            - Path=/api/catalog/**
+          filters:
+            - TokenRelay
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+                key-resolver: "#{@principalNameKeyResolver}"
+
+        # Example: User-authenticated rate limiting
+        - id: user-api
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - TokenRelay
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+                key-resolver: "#{@principalNameKeyResolver}"
