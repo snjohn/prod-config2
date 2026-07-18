@@ -37,9 +37,11 @@ import reactor.core.publisher.Mono;
  */
 @Configuration
 @EnableWebFluxSecurity
+@EnableConfigurationProperties(GatewayProperties.class)
 public class SecurityConfig {
 
     @Bean
+    @ConditionalOnProperty(prefix = "patternslib.gateway.security", name = "enabled", havingValue = "true", matchIfMissing = true)
     public SecurityWebFilterChain jwtSecurityWebFilterChain(
             ServerHttpSecurity http,
             ServerLogoutSuccessHandler oidcLogoutSuccessHandler,
@@ -117,12 +119,12 @@ public class SecurityConfig {
         return successHandler;
     }
 
-    // @Bean
-    // @ConditionalOnProperty(prefix = "patternslib.gateway.security", name = "enabled", havingValue = "false")
-    // public SecurityWebFilterChain permitAllSecurityWebFilterChain(ServerHttpSecurity http) {
-    //     http
-    //             .csrf(csrf -> csrf.disable())
-    //             .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll());
-    //     return http.build();
-    // }
+    @Bean
+    @ConditionalOnProperty(prefix = "patternslib.gateway.security", name = "enabled", havingValue = "false")
+    public SecurityWebFilterChain permitAllSecurityWebFilterChain(ServerHttpSecurity http) {
+        http
+                .csrf(csrf -> csrf.disable())
+                .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll());
+        return http.build();
+    }
 }

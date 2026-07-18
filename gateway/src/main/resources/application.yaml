@@ -47,8 +47,15 @@ spring:
           predicates:
             - Path=/api/**
           filters:
-            - TokenRelay # This automatically passes the JWT to the backend
-            
+            - TokenRelay
+            # Redis-based distributed rate limiter
+            - name: RequestRateLimiter
+              args:
+                '[redis-rate-limiter.replenishRate]': 10    # 10 requests/second
+                '[redis-rate-limiter.burstCapacity]': 20     # Allow bursts up to 20
+                '[redis-rate-limiter.requestedTokens]': 1
+                '[key-resolver]': "#{@combinedKeyResolver}"  # User if authenticated, IP otherwise
+
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin
       globalcors:
